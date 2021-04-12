@@ -27,14 +27,21 @@ module IdempotentRequest
     private
 
     def setnx_with_expiration(key, data)
-      redis.set(
-        key,
-        data,
-        {}.tap do |options|
-          options[:nx] = true
-          options[:ex] = expire_time.to_i if expire_time.to_i > 0
-        end
-      )
+
+      if (expire_time.to_i)
+        redis.set(
+          key,
+          data,
+          nx: true,
+          ex: expire_time.to_i
+        )
+      else
+        redis.set(
+          key,
+          data,
+          nx: true
+        )
+      end
     end
 
     def lock_key(key)
